@@ -107,7 +107,7 @@ async def instagram_callback(query: CallbackQuery):
 
         await msg.edit_text("✅ <b>Загружено! Отправляю файлы...</b>")
 
-        # ── Отправка фото группой ──────────────────────────────────────────────
+        # ── Отправка фото группой ─────────────────────────────────────────────
         if photos:
             media_group = [InputMediaPhoto(media=FSInputFile(p)) for p in photos[:10]]
             try:
@@ -119,7 +119,7 @@ async def instagram_callback(query: CallbackQuery):
                     except Exception:
                         logger.exception("Ошибка отправки фото: %s", p)
 
-        # ── Отправка видео ────────────────────────────────────────────────────
+        # ── Отправка видео ──────────────────────────────────────────────────
         for v in videos[:5]:
             try:
                 await query.message.reply_video(
