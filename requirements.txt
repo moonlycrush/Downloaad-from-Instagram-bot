@@ -1,0 +1,9 @@
+aiogram>=3.0.0,<4.0
+aiosqlite>=0.18.0
+yt-dlp>=2024.01.0
+instaloader>=4.9
+aiohttp>=3.8.0
+python-dotenv>=0.21.0
+Pillow>=9.0.0
+aiofiles>=23.0.0
+typing-extensions>=4.0.0
