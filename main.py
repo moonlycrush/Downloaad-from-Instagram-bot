@@ -18,22 +18,33 @@ from handlers.start import start_router
 from handlers.instagram import instagram_router
 from handlers.youtube import youtube_router
 from handlers.admin import admin_router
+# optional debug router (will log all incoming messages)
+from handlers.debug import debug_router
 
 # Default download dir (can be overridden via env var)
 DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR", "data/downloads")
 
+# Logging level can be controlled via LOG_LEVEL env var. Use DEBUG for troubleshooting.
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger(__name__)
 
 
 async def main() -> None:
-    logger.info("Starting bot...")
+    logger.info("🚀 Starting bot...")
     Path(DOWNLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
-    bot = Bot(token="8601595538:AAHpbSDpDLmQYjVuCYfN66MlpGw-d6NyK5w", default=DefaultBotProperties(parse_mode="HTML"))
+    # Read token from environment
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
+    if not BOT_TOKEN:
+        raise RuntimeError(
+            "❌ BOT_TOKEN not set. Create a .env file or export BOT_TOKEN environment variable."
+        )
+
+    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
 
@@ -62,6 +73,13 @@ async def main() -> None:
     dp.include_router(youtube_router)
     dp.include_router(admin_router)
 
+    # include debug router last (it only logs incoming messages)
+    # Enable it by setting LOG_LEVEL=DEBUG or DEBUG_RESPOND=1 to get replies
+    dp.include_router(debug_router)
+
+    logger.info("🎯 All routers loaded")
+    logger.info("⏳ Bot is running... (Ctrl+C to stop)")
+
     try:
         await dp.start_polling(bot)
     finally:
@@ -73,4 +91,6 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        logger.info("Bot stopped")
+        logger.info("🛑 Bot stopped")
+    except Exception:
+        logger.exception("❌ Unhandled exception in main")
